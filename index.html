@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>XRPMAN'S MUSIC NFT CREATOR</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: #00FF00; --g2: rgba(0,255,0,0.09); --g3: rgba(0,255,0,0.28);
+  --b: #00F0FF; --b2: rgba(0,240,255,0.07);
+  --r: #ff4444;
+  --dark: #050a05; --card: rgba(0,0,0,0.88); --inp: #030803; --bdr: rgba(0,255,0,0.15);
+  --mono: 'Share Tech Mono', monospace; --disp: 'Orbitron', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--dark); color: #fff; font-family: var(--mono); min-height: 100vh; overflow-x: hidden; background-image: radial-gradient(ellipse at 50% 0%, #001800 0%, #050a05 65%); }
+#bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.app { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 20px 16px 210px; }
+
+/* HEADER */
+.header { text-align: center; margin-bottom: 32px; }
+.v-badge { display: inline-block; background: var(--g); color: #000; font-family: var(--disp); font-size: .5rem; font-weight: 700; padding: 3px 14px; border-radius: 20px; letter-spacing: 2px; margin-bottom: 10px; }
+.header h1 { font-family: var(--disp); font-weight: 900; font-size: clamp(1.1rem,5vw,1.8rem); color: var(--g); text-shadow: 0 0 20px var(--g), 0 0 50px rgba(0,255,0,.2); letter-spacing: 3px; text-transform: uppercase; line-height: 1.2; }
+.header .sub { font-family: var(--disp); font-size: .52rem; letter-spacing: 7px; color: rgba(0,255,0,.45); margin: 8px 0 16px; text-transform: uppercase; }
+.hdr-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.btn-hdr { background: transparent; border: 1px solid var(--b); color: var(--b); padding: 10px 18px; border-radius: 24px; cursor: pointer; font-family: var(--mono); font-size: .65rem; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; min-height: 48px; display: inline-flex; align-items: center; }
+.btn-hdr:hover { background: var(--b); color: #000; }
+.btn-tip { background: var(--g2); border: 1px solid var(--g); color: var(--g); padding: 10px 18px; border-radius: 24px; cursor: pointer; font-family: var(--mono); font-size: .65rem; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; min-height: 48px; display: inline-flex; align-items: center; }
+.btn-tip:hover { background: var(--g); color: #000; }
+
+/* SECTION */
+.section { margin-bottom: 24px; }
+.step-lbl { font-family: var(--disp); font-size: .52rem; color: var(--b); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; text-shadow: 0 0 8px var(--b); display: flex; align-items: center; gap: 8px; }
+.step-lbl::after { content:''; flex:1; height:1px; background:linear-gradient(to right,rgba(0,240,255,.3),transparent); }
+.card { background: var(--card); border: 1px solid var(--bdr); border-radius: 14px; padding: 18px; backdrop-filter: blur(10px); transition: border-color .3s, box-shadow .3s; }
+.card.err { border-color: var(--r) !important; box-shadow: 0 0 14px rgba(255,68,68,.1); }
+.card.ok  { border-color: rgba(0,255,0,.45); }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:400px) { .g2 { grid-template-columns: 1fr; } }
+.ig { margin-bottom: 14px; }
+.ig:last-child { margin-bottom: 0; }
+label { display: block; font-size: .6rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+input[type=text], input[type=number], textarea, select {
+  width: 100%; background: var(--inp); border: 1px solid #1e1e1e; color: #fff;
+  padding: 12px; border-radius: 8px; font-family: var(--mono); font-size: .85rem;
+  outline: none; transition: border-color .2s; min-height: 48px; -webkit-appearance: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--g); box-shadow: 0 0 6px rgba(0,255,0,.08); }
+textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2300FF00' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+select option { background: #0a0a0a; color: #fff; }
+
+/* UPLOAD ZONE */
+.upload-zone { border: 2px dashed rgba(0,255,0,.25); border-radius: 12px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all .3s; background: rgba(0,255,0,.015); position: relative; min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--g); background: rgba(0,255,0,.04); box-shadow: 0 0 20px rgba(0,255,0,.08); }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; font-size: 16px; }
+.upload-icon { font-size: 2rem; }
+.upload-zone p { font-size: .75rem; color: #666; }
+.upload-zone .hint { font-size: .6rem; color: #3a3a3a; }
+
+/* AUTO DISTRIBUTE */
+.btn-distro { width: 100%; background: rgba(0,240,255,.05); border: 1px solid rgba(0,240,255,.25); color: var(--b); padding: 10px; border-radius: 8px; cursor: pointer; font-family: var(--mono); font-size: .65rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; transition: all .2s; min-height: 44px; display: none; }
+.btn-distro:hover { background: var(--b2); border-color: var(--b); }
+
+/* IMAGE GRID */
+.img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 14px; margin-top: 14px; }
+@media(max-width:500px) { .img-grid { grid-template-columns: 1fr; } }
+
+.img-card { background: rgba(0,0,0,.75); border: 1px solid #1e1e1e; border-radius: 14px; overflow: hidden; transition: border-color .2s; position: relative; }
+.img-card:hover { border-color: rgba(0,255,0,.3); }
+.img-top { display: flex; gap: 0; }
+.img-thumb { width: 110px; height: 110px; object-fit: cover; display: block; background: #080808; flex-shrink: 0; }
+@media(max-width:400px) { .img-thumb { width: 90px; height: 90px; } }
+.img-top-info { flex: 1; padding: 10px 10px 10px 12px; display: flex; flex-direction: column; justify-content: space-between; }
+.img-fname { font-size: .58rem; color: var(--g); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+.pct-badge { display: flex; align-items: center; justify-content: space-between; background: rgba(0,255,0,.05); border: 1px solid rgba(0,255,0,.15); border-radius: 8px; padding: 5px 8px; }
+.pct-num { font-family: var(--disp); font-size: 1.2rem; font-weight: 900; color: var(--g); text-shadow: 0 0 10px var(--g); line-height: 1; }
+.pct-label { font-size: .45rem; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+.pct-count { font-size: .6rem; color: #888; }
+
+.qty-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.qty-num-inp { width: 62px !important; padding: 7px 4px !important; font-size: 1rem !important; font-weight: bold !important; text-align: center !important; flex-shrink: 0 !important; min-height: 42px !important; color: var(--g) !important; border-color: rgba(0,255,0,.2) !important; }
+.qty-num-inp:focus { border-color: var(--g) !important; }
+.qty-slider { flex: 1; -webkit-appearance: none; appearance: none; height: 7px; background: #1a1a1a; border-radius: 4px; outline: none; border: none; padding: 0; cursor: pointer; min-width: 0; }
+.qty-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--g); cursor: pointer; box-shadow: 0 0 8px var(--g); }
+.qty-slider::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: var(--g); cursor: pointer; border: none; }
+
+/* ASSIGNMENTS PANEL */
+.assign-panel { padding: 10px 12px 12px; border-top: 1px solid #1a1a1a; }
+.assign-section { margin-bottom: 10px; }
+.assign-section:last-child { margin-bottom: 0; }
+.assign-lbl { font-size: .52rem; color: #555; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+
+/* AUDIO CHIPS on image card */
+.audio-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; min-height: 10px; }
+.audio-chip { display: inline-flex; align-items: center; gap: 4px; background: rgba(0,240,255,.08); border: 1px solid rgba(0,240,255,.25); color: var(--b); border-radius: 20px; padding: 3px 8px; font-size: .58rem; }
+.audio-chip button { background: none; border: none; color: rgba(0,240,255,.6); cursor: pointer; font-size: .65rem; padding: 0; line-height: 1; display: flex; align-items: center; }
+.audio-chip button:hover { color: var(--r); }
+.audio-chip.empty { color: #333; border-color: #1a1a1a; background: transparent; font-style: italic; }
+
+.audio-add-row { display: flex; gap: 6px; align-items: center; }
+.audio-add-row select { flex: 1; font-size: .72rem !important; padding: 7px 32px 7px 8px !important; min-height: 38px !important; }
+.btn-assign-audio { background: rgba(0,240,255,.08); border: 1px solid rgba(0,240,255,.3); color: var(--b); padding: 7px 12px; border-radius: 8px; cursor: pointer; font-family: var(--mono); font-size: .6rem; text-transform: uppercase; white-space: nowrap; min-height: 38px; transition: all .2s; }
+.btn-assign-audio:hover { background: var(--b2); border-color: var(--b); }
+
+/* TRAIT CHIPS on image card */
+.trait-assign-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.trait-assign-name { font-size: .6rem; color: #888; min-width: 60px; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trait-assign-row select { flex: 1; font-size: .72rem !important; padding: 7px 32px 7px 8px !important; min-height: 38px !important; border-color: rgba(0,240,255,.15) !important; }
+.trait-assign-row select:focus { border-color: var(--b) !important; }
+
+.btn-del-img { position: absolute; top: 7px; right: 7px; background: rgba(0,0,0,.9); border: 1px solid var(--r); color: var(--r); width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: .6rem; display: flex; align-items: center; justify-content: center; z-index: 2; }
+.btn-del-img:active { background: var(--r); color: #000; }
+
+/* TALLY */
+.img-tally { margin-top: 14px; text-align: center; display: none; }
+.tally-big { font-family: var(--disp); font-size: 1rem; letter-spacing: 2px; font-weight: 700; padding: 10px; border-radius: 8px; border: 1px solid #1a1a1a; }
+.tally-big.good { color: var(--g); border-color: rgba(0,255,0,.3); background: rgba(0,255,0,.04); }
+.tally-big.warn { color: var(--r); border-color: rgba(255,68,68,.3); background: rgba(255,68,68,.04); }
+
+/* DISTRO BARS */
+.distro-bars { margin-top: 12px; display: none; }
+.distro-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.distro-name { font-size: .58rem; color: #888; min-width: 80px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.distro-bar-bg { flex: 1; background: #111; border-radius: 3px; height: 6px; overflow: hidden; }
+.distro-bar-fill { height: 100%; background: var(--g); border-radius: 3px; transition: width .3s; box-shadow: 0 0 5px rgba(0,255,0,.3); }
+.distro-pct { font-size: .58rem; color: var(--g); min-width: 38px; text-align: right; }
+
+/* AUDIO LIBRARY */
+.lib-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.lib-row input { flex: 1; }
+.lib-badge { background: rgba(0,255,0,.08); border: 1px solid rgba(0,255,0,.2); color: var(--g); padding: 2px 8px; border-radius: 4px; font-size: .55rem; white-space: nowrap; }
+
+/* TOGGLE */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.toggle-lbl { font-size: .65rem; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+.toggle { position: relative; width: 50px; height: 28px; flex-shrink: 0; }
+.toggle input { display: none; }
+.tog-track { position: absolute; inset: 0; background: #111; border-radius: 14px; border: 1px solid #2a2a2a; cursor: pointer; transition: all .3s; }
+.toggle input:checked + .tog-track { background: rgba(0,255,0,.15); border-color: var(--g); box-shadow: 0 0 8px rgba(0,255,0,.2); }
+.tog-thumb { position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; background: #3a3a3a; border-radius: 50%; pointer-events: none; transition: all .3s; }
+.toggle input:checked ~ .tog-thumb { background: var(--g); left: 26px; box-shadow: 0 0 6px var(--g); }
+
+/* TRAITS BUILDER */
+.trait-def-box { background: rgba(0,240,255,.02); border: 1px solid rgba(0,240,255,.12); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.trait-def-hdr { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+.trait-def-hdr input { flex: 1; }
+.trait-def-vals { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; min-height: 16px; }
+.val-chip { display: inline-flex; align-items: center; gap: 5px; background: rgba(0,240,255,.07); border: 1px solid rgba(0,240,255,.2); border-radius: 20px; padding: 4px 10px; font-size: .62rem; color: var(--b); }
+.val-chip button { background: none; border: none; color: rgba(255,68,68,.6); cursor: pointer; font-size: .65rem; display: flex; align-items: center; }
+.val-chip button:hover { color: var(--r); }
+.val-add-row { display: flex; gap: 6px; }
+.val-add-row input { flex: 1; font-size: .78rem !important; padding: 8px 10px !important; min-height: 40px !important; }
+.btn-add-val { background: transparent; border: 1px solid rgba(0,240,255,.3); color: var(--b); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: var(--mono); font-size: .62rem; text-transform: uppercase; min-height: 40px; white-space: nowrap; transition: all .2s; }
+.btn-add-val:hover { background: var(--b2); border-color: var(--b); }
+
+/* BUTTONS */
+.btn-add { width: 100%; background: transparent; border: 1px dashed var(--b); color: var(--b); padding: 10px; border-radius: 8px; cursor: pointer; font-family: var(--mono); font-size: .65rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; transition: all .2s; min-height: 48px; }
+.btn-add:hover { background: var(--b2); }
+.btn-add.grn { border-color: var(--g); color: var(--g); }
+.btn-add.grn:hover { background: var(--g2); }
+.btn-icon { background: rgba(255,68,68,.08); border: 1px solid rgba(255,68,68,.3); color: var(--r); width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .75rem; }
+.btn-icon:active { background: rgba(255,68,68,.2); }
+
+/* NOTICE */
+.notice { background: rgba(0,240,255,.03); border: 1px solid rgba(0,240,255,.15); color: var(--b); padding: 10px 14px; border-radius: 8px; font-size: .63rem; line-height: 1.55; margin-top: 12px; }
+.notice b { color: #ccc; }
+
+/* BATCH NAVIGATOR */
+.nav-box { background: rgba(0,0,0,.9); border: 1px solid rgba(0,255,0,.2); border-radius: 14px; padding: 18px; margin-bottom: 24px; display: none; }
+.nav-title { font-family: var(--disp); font-size: .55rem; color: var(--b); letter-spacing: 3px; text-transform: uppercase; text-align: center; margin-bottom: 14px; }
+.btn-build-batch { width: 100%; background: rgba(0,255,0,.06); border: 1px solid rgba(0,255,0,.3); color: var(--g); padding: 14px; border-radius: 10px; cursor: pointer; font-family: var(--disp); font-size: .68rem; letter-spacing: 2px; text-transform: uppercase; min-height: 52px; margin-bottom: 14px; transition: all .2s; }
+.btn-build-batch:hover { background: var(--g2); }
+.nav-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 16px; }
+.btn-nav { background: rgba(0,255,0,.07); border: 1px solid rgba(0,255,0,.3); color: var(--g); width: 56px; height: 56px; border-radius: 12px; cursor: pointer; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.btn-nav:active { background: var(--g2); }
+.btn-nav:disabled { opacity: .2; cursor: not-allowed; }
+.nav-counter { text-align: center; min-width: 120px; }
+.nav-num { font-family: var(--disp); font-size: 1rem; color: #fff; letter-spacing: 2px; }
+.nav-sub { font-size: .48rem; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+.nav-preview { display: flex; gap: 14px; align-items: flex-start; }
+@media(max-width:480px) { .nav-preview { flex-direction: column; } }
+.nav-thumb { width: 110px; height: 110px; flex-shrink: 0; border: 1px solid #1e1e1e; border-radius: 8px; overflow: hidden; background: #0a0a0a; display: flex; align-items: center; justify-content: center; font-size: .58rem; color: #333; text-align: center; }
+@media(max-width:480px) { .nav-thumb { width: 100%; height: 140px; } }
+.nav-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.nav-json { flex: 1; background: #000; border: 1px solid #111; border-left: 3px solid var(--g); border-radius: 8px; padding: 14px; font-family: var(--mono); font-size: .65rem; color: var(--g); white-space: pre-wrap; overflow-x: auto; max-height: 220px; overflow-y: auto; line-height: 1.55; }
+
+/* LIVE PREVIEW */
+.prev-lbl { font-size: .52rem; color: rgba(0,255,0,.55); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+.prev-box { background: #000; border: 1px solid #111; border-left: 3px solid var(--g); border-radius: 8px; padding: 16px; font-family: var(--mono); font-size: .68rem; color: var(--g); white-space: pre-wrap; overflow-x: auto; max-height: 250px; overflow-y: auto; line-height: 1.55; }
+
+/* FOOTER */
+.footer { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,4,0,.97); border-top: 1px solid rgba(0,255,0,.2); padding: 14px 16px; text-align: center; z-index: 100; backdrop-filter: blur(20px); }
+.btn-main { width: 100%; max-width: 640px; padding: 18px; background: var(--g); border: none; border-radius: 12px; font-family: var(--disp); font-weight: 700; font-size: .85rem; letter-spacing: 2px; color: #000; cursor: pointer; text-transform: uppercase; transition: all .2s; min-height: 52px; }
+.btn-main:hover:not(:disabled) { box-shadow: 0 0 30px rgba(0,255,0,.4); }
+.btn-main:active:not(:disabled) { transform: scale(.98); }
+.btn-main:disabled { background: #0b1a0b; color: #173017; cursor: not-allowed; }
+.status-txt { font-family: var(--disp); font-size: .52rem; letter-spacing: 2px; margin-top: 7px; text-transform: uppercase; }
+
+/* MODAL */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.97); z-index: 1000; overflow-y: auto; padding: 16px; }
+.modal.open { display: block; }
+.m-content { max-width: 480px; margin: 30px auto; background: #060606; border: 2px solid var(--g); border-radius: 16px; padding: 28px; box-shadow: 0 0 40px rgba(0,255,0,.1); }
+.m-title { font-family: var(--disp); font-size: .95rem; color: var(--b); letter-spacing: 2px; margin-bottom: 22px; text-align: center; }
+.tut-step { margin-bottom: 20px; }
+.tut-step h3 { color: var(--g); font-size: .8rem; margin-bottom: 5px; }
+.tut-step p { color: #888; font-size: .73rem; line-height: 1.55; }
+.tut-step code { color: var(--b); background: #111; padding: 1px 5px; border-radius: 3px; }
+.qr-wrap { width: 160px; height: 160px; background: #fff; margin: 16px auto; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 10px; }
+.qr-wrap img { width: 100%; height: 100%; }
+.addr-box { background: #0a0a0a; border: 1px solid #1e1e1e; border-radius: 8px; padding: 12px; font-family: var(--mono); font-size: .75rem; color: var(--b); word-break: break-all; text-align: center; margin: 14px 0; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(0,255,0,.18); border-radius: 2px; }
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<!-- TUTORIAL -->
+<div id="mod-tut" class="modal">
+  <div class="m-content">
+    <div class="m-title">🚀 QUICK START — v5</div>
+    <div class="tut-step"><h3>1. Collection Identity</h3><p>Set project name + total batch size.</p></div>
+    <div class="tut-step"><h3>2. Upload Images</h3><p>Each image gets a quantity slider. <b>Auto-Distribute</b> splits evenly. Total must equal batch size.</p></div>
+    <div class="tut-step"><h3>3. Audio Library</h3><p>Add your track filenames once — e.g. <code>1.mp3</code>, <code>rare.mp3</code>. Then on each image card, pick which tracks belong to that image from a dropdown. No file upload needed — XRP Cafe handles IPFS.</p></div>
+    <div class="tut-step"><h3>4. Traits</h3><p>Define traits once (e.g. <b>Hat → Gold, Silver</b>). Then on each image card, pick which value applies. The rarity comes from the image's quantity — no extra math needed.</p></div>
+    <div class="tut-step"><h3>5. Preview &amp; Export</h3><p>Use the Batch Navigator to flip through every NFT before exporting. Download ZIP → drop files in <code>media/</code> → upload to XRP Cafe.</p></div>
+    <button class="btn-main" onclick="closeModal('mod-tut')">GET STARTED</button>
+  </div>
+</div>
+
+<!-- TIP -->
+<div id="mod-tip" class="modal">
+  <div class="m-content" style="text-align:center;">
+    <div class="m-title">🪙 TIP THE CREATOR</div>
+    <p style="font-size:.72rem;color:#555;">Support XRPMAN — send XRP</p>
+    <div class="qr-wrap">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=rDg6Q7mTBsVo35cNf6vUSx8uEsDD8Hw7B2" alt="QR">
+    </div>
+    <div class="addr-box" id="xrp-addr">rDg6Q7mTBsVo35cNf6vUSx8uEsDD8Hw7B2</div>
+    <button class="btn-hdr" onclick="copyAddr()" id="copyAddrBtn" style="margin:0 auto;">📋 COPY ADDRESS</button>
+    <div style="margin-top:20px;"><button class="btn-main" onclick="closeModal('mod-tip')">CLOSE</button></div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="v-badge">v5.0</div>
+    <h1>XRPMAN'S<br>MUSIC NFT CREATOR</h1>
+    <div class="sub">POWERED BY XMEME</div>
+    <div class="hdr-btns">
+      <button class="btn-hdr" onclick="openModal('mod-tut')">📖 HOW TO USE</button>
+      <button class="btn-tip" onclick="openModal('mod-tip')">🪙 TIP XRPMAN</button>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section">
+    <div class="step-lbl">Step 1 · Collection Identity</div>
+    <div class="card">
+      <div class="ig"><label>Project Name *</label><input type="text" id="name" placeholder="e.g. Neon Soul" oninput="refresh()"></div>
+      <div class="g2">
+        <div class="ig"><label>Total Batch Size *</label><input type="number" id="count" value="10" min="1" inputmode="numeric" oninput="onBatchChange()"></div>
+        <div class="ig"><label>Collection Name</label><input type="text" id="collection" placeholder="XMEME Series" oninput="refresh()"></div>
+      </div>
+      <div class="ig"><label>Description</label><textarea id="description" placeholder="Tell the world about this drop..." oninput="refresh()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: IMAGES -->
+  <div class="section">
+    <div class="step-lbl">Step 2 · Upload Images</div>
+    <div class="card" id="img-card">
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="img-input" multiple accept="image/*" onchange="handleImages(this.files)">
+        <div class="upload-icon">🖼️</div>
+        <p>Tap to add images</p>
+        <div class="hint">Desktop: drag &amp; drop a folder · Phone: tap to browse gallery</div>
+      </div>
+      <button class="btn-distro" id="distro-btn" onclick="autoDistribute()">⚡ AUTO-DISTRIBUTE EVENLY ACROSS BATCH</button>
+      <div class="img-grid" id="img-grid"></div>
+      <div class="img-tally" id="img-tally"><div class="tally-big" id="tally-big">0 / 10</div></div>
+      <div class="distro-bars" id="distro-bars"></div>
+    </div>
+  </div>
+
+  <!-- STEP 3: AUDIO LIBRARY -->
+  <div class="section">
+    <div class="step-lbl">Step 3 · Audio Library</div>
+    <div class="card">
+      <p style="font-size:.63rem;color:#555;margin-bottom:14px;line-height:1.6;">
+        Add all your track filenames here first. Then assign them to images in Step 2.<br>
+        <span style="color:#3a3a3a;">Filenames only — XRP Cafe handles the IPFS upload.</span>
+      </p>
+      <div id="audio-lib-list"></div>
+      <button class="btn-add" onclick="addAudioLib()">+ Add Track to Library</button>
+      <div class="notice" style="margin-top:12px;">
+        <b>How it works:</b> Add <code>1.mp3</code>, <code>album_track.mp3</code>, <code>rare.mp3</code> etc here. Each image card will show a dropdown to pick which track(s) go on that image's NFTs.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: TRAITS -->
+  <div class="section">
+    <div class="step-lbl">Step 4 · Define Traits (Optional)</div>
+    <div class="card">
+      <div class="toggle-row">
+        <span class="toggle-lbl">Enable Trait Attributes</span>
+        <label class="toggle">
+          <input type="checkbox" id="traits-tog" onchange="toggleTraits()">
+          <div class="tog-track"></div>
+          <div class="tog-thumb"></div>
+        </label>
+      </div>
+      <div id="traits-sec" style="display:none;">
+        <p style="font-size:.63rem;color:#555;margin-bottom:12px;line-height:1.6;">
+          Define trait categories and their possible values here.<br>
+          Then assign a value to each image in Step 2.
+        </p>
+        <div id="traits-list"></div>
+        <button class="btn-add grn" onclick="addTrait()">+ Add Trait Category</button>
+        <div class="notice" style="margin-top:12px;">
+          <b>Example:</b> Create trait <code>Hat</code> with values <code>Gold</code>, <code>Silver</code>, <code>None</code>. Then pick which value applies to each image. Rarity is automatic — it's based on the image's quantity.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BATCH NAVIGATOR -->
+  <div class="nav-box" id="nav-box">
+    <div class="nav-title">⬡ Batch Preview Navigator</div>
+    <button class="btn-build-batch" onclick="buildBatch()">🔄 BUILD PREVIEW — Inspect Every NFT Before Export</button>
+    <div class="nav-controls">
+      <button class="btn-nav" id="nav-prev" onclick="navStep(-1)" disabled>◀</button>
+      <div class="nav-counter">
+        <div class="nav-num" id="nav-num">— / —</div>
+        <div class="nav-sub">NFT SLOT</div>
+      </div>
+      <button class="btn-nav" id="nav-next" onclick="navStep(1)" disabled>▶</button>
+    </div>
+    <div class="nav-preview">
+      <div class="nav-thumb" id="nav-thumb">build<br>first</div>
+      <div class="nav-json" id="nav-json">Press "Build Preview" to generate all slots, then arrow through each NFT.</div>
+    </div>
+  </div>
+
+  <!-- LIVE PREVIEW -->
+  <div class="section">
+    <div class="prev-lbl">⬡ Live Preview — NFT #1</div>
+    <div class="prev-box" id="preview">{}</div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <button id="gen-btn" class="btn-main" disabled onclick="generate()">⬇ DOWNLOAD PROJECT ZIP</button>
+  <div id="status-txt" class="status-txt" style="color:var(--r);">ADD IMAGES TO GET STARTED</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+// images[]: { name, dataUrl, qty, audioTracks:[], traitValues:{traitId: valueStr} }
+let images      = [];
+// audioLib[]: { id, filename }
+let audioLib    = [];
+// traits[]:   { id, name, values:[] }
+let traits      = [];
+let batchSlots  = [];
+let navIdx      = 0;
+let idCounter   = 1;
+const uid = () => idCounter++;
+
+/* ═══════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════════════
+   DRAG & DROP (folder support)
+═══════════════════════════════════════════════════════ */
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over');
+  const items = e.dataTransfer.items;
+  if (!items) { handleImages(e.dataTransfer.files); return; }
+  const fileList = []; let pending = 0;
+  const done = () => { if (pending === 0 && fileList.length) handleImages(fileList); };
+  Array.from(items).forEach(item => {
+    if (item.kind !== 'file') return;
+    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+    if (entry && entry.isDirectory) {
+      pending++;
+      entry.createReader().readEntries(entries => {
+        entries.forEach(en => { if (en.isFile) { pending++; en.file(f => { if (f.type.startsWith('image/')) fileList.push(f); pending--; done(); }); } });
+        pending--; done();
+      });
+    } else { const f = item.getAsFile(); if (f && f.type.startsWith('image/')) fileList.push(f); }
+  });
+  if (pending === 0 && fileList.length) handleImages(fileList);
+});
+
+/* ═══════════════════════════════════════════════════════
+   HANDLE IMAGE FILES
+═══════════════════════════════════════════════════════ */
+function handleImages(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+  let loaded = 0;
+  arr.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      images.push({ name: file.name, dataUrl: e.target.result, qty: 0, audioTracks: [], traitValues: {} });
+      loaded++;
+      if (loaded === arr.length) { renderGrid(); refresh(); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUTO DISTRIBUTE
+═══════════════════════════════════════════════════════ */
+function autoDistribute() {
+  const total = getTotal(); const n = images.length;
+  if (!n || !total) return;
+  const base = Math.floor(total / n); const extra = total % n;
+  images.forEach((img, i) => { img.qty = base + (i < extra ? 1 : 0); });
+  renderGrid(); refresh();
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER IMAGE GRID
+═══════════════════════════════════════════════════════ */
+function renderGrid() {
+  const grid   = document.getElementById('img-grid');
+  const tally  = document.getElementById('img-tally');
+  const distroEl = document.getElementById('distro-bars');
+  const distroBtn = document.getElementById('distro-btn');
+  grid.innerHTML = '';
+  const hasImgs = images.length > 0;
+  tally.style.display   = hasImgs ? 'block' : 'none';
+  distroEl.style.display = hasImgs ? 'block' : 'none';
+  distroBtn.style.display = hasImgs ? 'block' : 'none';
+  document.getElementById('nav-box').style.display = hasImgs ? 'block' : 'none';
+
+  const total = getTotal();
+
+  images.forEach((img, idx) => {
+    const pct = total > 0 && img.qty > 0 ? ((img.qty / total) * 100).toFixed(1) : '0.0';
+
+    // Audio chips
+    const audioChipsHtml = img.audioTracks.length
+      ? img.audioTracks.map((tid, ci) => {
+          const track = audioLib.find(t => t.id === tid);
+          if (!track) return '';
+          return `<span class="audio-chip">🎵 ${esc(track.filename)}<button onclick="removeAudioFromImage(${idx},${ci})" title="Remove">✕</button></span>`;
+        }).join('')
+      : '<span class="audio-chip empty">no tracks assigned</span>';
+
+    // Audio dropdown options
+    const audioOptHtml = audioLib.length
+      ? `<option value="">-- pick a track --</option>` + audioLib.map(t =>
+          `<option value="${t.id}">${esc(t.filename)}</option>`).join('')
+      : `<option value="">-- add tracks in Step 3 first --</option>`;
+
+    // Trait assignments
+    const traitRowsHtml = document.getElementById('traits-tog').checked && traits.length
+      ? traits.map(tr => {
+          const curVal = img.traitValues[tr.id] || '';
+          const opts   = `<option value="">-- none --</option>` +
+            tr.values.map(v => `<option value="${esc(v)}" ${curVal === v ? 'selected' : ''}>${esc(v)}</option>`).join('');
+          return `<div class="trait-assign-row">
+            <span class="trait-assign-name" title="${esc(tr.name)}">${esc(tr.name)}</span>
+            <select onchange="setTraitValue(${idx},'${tr.id}',this.value)">${opts}</select>
+          </div>`;
+        }).join('')
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'img-card';
+    card.id = `icard-${idx}`;
+    card.innerHTML = `
+      <button class="btn-del-img" onclick="removeImg(${idx})">✕</button>
+      <div class="img-top">
+        <img class="img-thumb" src="${img.dataUrl}" alt="${esc(img.name)}">
+        <div class="img-top-info">
+          <div class="img-fname" title="${esc(img.name)}">${esc(img.name)}</div>
+          <div class="qty-row">
+            <input type="number" class="qty-num-inp" id="qi-${idx}" value="${img.qty}" min="0" inputmode="numeric"
+              oninput="setQty(${idx},this.value)">
+            <input type="range" class="qty-slider" id="qs-${idx}" min="0" max="${Math.max(total,1)}" value="${img.qty}"
+              oninput="setQtySlider(${idx},this.value)">
+          </div>
+          <div class="pct-badge">
+            <div>
+              <div class="pct-num" id="pn-${idx}">${pct}%</div>
+              <div class="pct-label">of batch</div>
+            </div>
+            <div class="pct-count" id="pc-${idx}">${img.qty} NFTs</div>
+          </div>
+        </div>
+      </div>
+      <div class="assign-panel">
+        <div class="assign-section">
+          <div class="assign-lbl">🎵 Audio tracks for this image</div>
+          <div class="audio-chips" id="achips-${idx}">${audioChipsHtml}</div>
+          <div class="audio-add-row">
+            <select id="asel-${idx}">${audioOptHtml}</select>
+            <button class="btn-assign-audio" onclick="assignAudioToImage(${idx})">+ Assign</button>
+          </div>
+        </div>
+        ${traitRowsHtml ? `<div class="assign-section"><div class="assign-lbl">🏷️ Trait values for this image</div>${traitRowsHtml}</div>` : ''}
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  updateTally();
+  updateDistro();
+}
+
+/* ═══════════════════════════════════════════════════════
+   QTY MANAGEMENT
+═══════════════════════════════════════════════════════ */
+function setQty(idx, val) {
+  images[idx].qty = parseInt(val) || 0;
+  const s = document.getElementById(`qs-${idx}`);
+  if (s) s.value = images[idx].qty;
+  updatePctBadge(idx); updateTally(); updateDistro(); refresh();
+}
+function setQtySlider(idx, val) {
+  images[idx].qty = parseInt(val) || 0;
+  const inp = document.getElementById(`qi-${idx}`);
+  if (inp) inp.value = images[idx].qty;
+  updatePctBadge(idx); updateTally(); updateDistro(); refresh();
+}
+function updatePctBadge(idx) {
+  const total = getTotal();
+  const pct   = total > 0 && images[idx].qty > 0 ? ((images[idx].qty / total) * 100).toFixed(1) : '0.0';
+  const pn = document.getElementById(`pn-${idx}`);
+  const pc = document.getElementById(`pc-${idx}`);
+  if (pn) pn.textContent = pct + '%';
+  if (pc) pc.textContent = images[idx].qty + ' NFTs';
+}
+function onBatchChange() {
+  const total = getTotal();
+  images.forEach((_, i) => {
+    const s = document.getElementById(`qs-${i}`);
+    if (s) s.max = Math.max(total, 1);
+    updatePctBadge(i);
+  });
+  updateTally(); updateDistro(); refresh();
+}
+function removeImg(idx) { images.splice(idx, 1); renderGrid(); refresh(); }
+
+/* ═══════════════════════════════════════════════════════
+   AUDIO ASSIGNMENT
+═══════════════════════════════════════════════════════ */
+function assignAudioToImage(idx) {
+  const sel = document.getElementById(`asel-${idx}`);
+  const id  = parseInt(sel.value);
+  if (!id) return;
+  if (!images[idx].audioTracks.includes(id)) {
+    images[idx].audioTracks.push(id);
+    renderChips(idx);
+    refresh();
+  }
+  sel.value = '';
+}
+
+function removeAudioFromImage(idx, chipIdx) {
+  images[idx].audioTracks.splice(chipIdx, 1);
+  renderChips(idx);
+  refresh();
+}
+
+function renderChips(idx) {
+  const el = document.getElementById(`achips-${idx}`);
+  if (!el) return;
+  el.innerHTML = images[idx].audioTracks.length
+    ? images[idx].audioTracks.map((tid, ci) => {
+        const track = audioLib.find(t => t.id === tid);
+        if (!track) return '';
+        return `<span class="audio-chip">🎵 ${esc(track.filename)}<button onclick="removeAudioFromImage(${idx},${ci})" title="Remove">✕</button></span>`;
+      }).join('')
+    : '<span class="audio-chip empty">no tracks assigned</span>';
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUDIO LIBRARY
+═══════════════════════════════════════════════════════ */
+function addAudioLib(filename = '') {
+  const id  = uid();
+  audioLib.push({ id, filename });
+  renderAudioLib();
+  renderGrid(); // refresh dropdowns on image cards
+  refresh();
+}
+
+function removeAudioLib(id) {
+  audioLib = audioLib.filter(t => t.id !== id);
+  // also remove from all images
+  images.forEach(img => { img.audioTracks = img.audioTracks.filter(tid => tid !== id); });
+  renderAudioLib();
+  renderGrid();
+  refresh();
+}
+
+function renderAudioLib() {
+  const list = document.getElementById('audio-lib-list');
+  list.innerHTML = '';
+  audioLib.forEach(track => {
+    const row = document.createElement('div');
+    row.className = 'lib-row';
+    row.innerHTML = `
+      <span class="lib-badge">🎵</span>
+      <input type="text" placeholder="e.g. 1.mp3" value="${esc(track.filename)}"
+        oninput="updateAudioLib(${track.id}, this.value)">
+      <button class="btn-icon" onclick="removeAudioLib(${track.id})">✕</button>`;
+    list.appendChild(row);
+  });
+  // refresh all dropdowns in image cards without full re-render
+  images.forEach((_, idx) => {
+    const sel = document.getElementById(`asel-${idx}`);
+    if (!sel) return;
+    sel.innerHTML = audioLib.length
+      ? `<option value="">-- pick a track --</option>` + audioLib.map(t => `<option value="${t.id}">${esc(t.filename)}</option>`).join('')
+      : `<option value="">-- add tracks in Step 3 first --</option>`;
+  });
+}
+
+function updateAudioLib(id, val) {
+  const t = audioLib.find(t => t.id === id);
+  if (t) { t.filename = val; }
+  // update chip labels without full re-render
+  images.forEach((_, idx) => renderChips(idx));
+  // update dropdowns
+  images.forEach((_, idx) => {
+    const sel = document.getElementById(`asel-${idx}`);
+    if (!sel) return;
+    sel.innerHTML = audioLib.length
+      ? `<option value="">-- pick a track --</option>` + audioLib.map(t => `<option value="${t.id}">${esc(t.filename)}</option>`).join('')
+      : `<option value="">-- add tracks in Step 3 first --</option>`;
+  });
+  refresh();
+}
+
+/* ═══════════════════════════════════════════════════════
+   TRAITS
+═══════════════════════════════════════════════════════ */
+function toggleTraits() {
+  document.getElementById('traits-sec').style.display =
+    document.getElementById('traits-tog').checked ? 'block' : 'none';
+  renderGrid(); refresh();
+}
+
+function addTrait() {
+  const id = String(uid());
+  traits.push({ id, name: '', values: [] });
+  renderTraits();
+}
+
+function removeTrait(id) {
+  traits = traits.filter(t => t.id !== id);
+  images.forEach(img => { delete img.traitValues[id]; });
+  renderTraits();
+  renderGrid(); refresh();
+}
+
+function updateTraitName(id, val) {
+  const t = traits.find(t => t.id === id);
+  if (t) t.name = val;
+  renderGrid(); refresh();
+}
+
+function addTraitValue(id, val) {
+  const t = traits.find(t => t.id === id);
+  if (!t || !val.trim()) return;
+  if (!t.values.includes(val.trim())) { t.values.push(val.trim()); }
+  renderTraits();
+  renderGrid(); refresh();
+}
+
+function removeTraitValue(id, val) {
+  const t = traits.find(t => t.id === id);
+  if (!t) return;
+  t.values = t.values.filter(v => v !== val);
+  images.forEach(img => { if (img.traitValues[id] === val) delete img.traitValues[id]; });
+  renderTraits();
+  renderGrid(); refresh();
+}
+
+function setTraitValue(imgIdx, traitId, val) {
+  if (val) images[imgIdx].traitValues[traitId] = val;
+  else delete images[imgIdx].traitValues[traitId];
+  refresh();
+}
+
+function renderTraits() {
+  const list = document.getElementById('traits-list');
+  list.innerHTML = '';
+  traits.forEach(tr => {
+    const box = document.createElement('div');
+    box.className = 'trait-def-box';
+    const valChips = tr.values.map(v =>
+      `<span class="val-chip">${esc(v)}<button onclick="removeTraitValue('${tr.id}','${esc(v)}')">✕</button></span>`
+    ).join('');
+    box.innerHTML = `
+      <div class="trait-def-hdr">
+        <input type="text" placeholder="Trait Name — e.g. Hat, Rarity, Edition"
+          value="${esc(tr.name)}" oninput="updateTraitName('${tr.id}',this.value)">
+        <button class="btn-icon" onclick="removeTrait('${tr.id}')">✕</button>
+      </div>
+      <div class="trait-values-lbl">Values</div>
+      <div class="trait-def-vals" id="tvals-${tr.id}">${valChips || '<span style="font-size:.58rem;color:#333">no values yet</span>'}</div>
+      <div class="val-add-row">
+        <input type="text" id="valinp-${tr.id}" placeholder="Type a value, e.g. Gold">
+        <button class="btn-add-val" onclick="addTraitValue('${tr.id}', document.getElementById('valinp-${tr.id}').value); document.getElementById('valinp-${tr.id}').value='';">+ Add</button>
+      </div>`;
+    list.appendChild(box);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   TALLY + DISTRO
+═══════════════════════════════════════════════════════ */
+function updateTally() {
+  const total    = getTotal();
+  const assigned = images.reduce((s, i) => s + i.qty, 0);
+  const el = document.getElementById('tally-big');
+  if (!el) return;
+  const over  = assigned > total;
+  const exact = assigned === total && total > 0;
+  el.textContent = exact
+    ? `✓ ${assigned} / ${total} — FULLY ASSIGNED`
+    : over ? `⚠ ${assigned} / ${total} — OVER BY ${assigned - total}`
+    : `${assigned} / ${total} — need ${total - assigned} more`;
+  el.className = 'tally-big ' + (exact ? 'good' : 'warn');
+}
+
+function updateDistro() {
+  const total = getTotal();
+  const el    = document.getElementById('distro-bars');
+  if (!el) return;
+  el.innerHTML = images.map(img => {
+    const pct = total > 0 ? (img.qty / total) * 100 : 0;
+    return `<div class="distro-row">
+      <div class="distro-name" title="${esc(img.name)}">${esc(img.name)}</div>
+      <div class="distro-bar-bg"><div class="distro-bar-fill" style="width:${pct}%"></div></div>
+      <div class="distro-pct">${img.qty > 0 ? pct.toFixed(1)+'%' : '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   BUILD NFT OBJECT
+═══════════════════════════════════════════════════════ */
+function getTotal() { return parseInt(document.getElementById('count').value) || 0; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function resolveAudio(imgAudioTracks) {
+  const filenames = imgAudioTracks.map(tid => {
+    const t = audioLib.find(t => t.id === tid);
+    return t ? t.filename.trim() : null;
+  }).filter(Boolean);
+  if (!filenames.length) return undefined;
+  return filenames.length === 1 ? filenames[0] : filenames;
+}
+
+function resolveTraits(traitValues) {
+  if (!document.getElementById('traits-tog').checked) return undefined;
+  const attrs = [];
+  traits.forEach(tr => {
+    const val = traitValues[tr.id];
+    if (val) attrs.push({ trait_type: tr.name || 'Trait', value: val });
+  });
+  return attrs.length ? attrs : undefined;
+}
+
+function makeNFT(projName, desc, coll, imgName, audioTracks, traitValues, slotIndex) {
+  const audio  = resolveAudio(audioTracks);
+  const attribs = resolveTraits(traitValues);
+  const obj = {
+    name:        `${projName} #${slotIndex + 1}`,
+    description: desc || undefined,
+    image:       `media/${imgName}`,
+    ...(audio !== undefined    ? { audio }           : {}),
+    ...(coll                   ? { collection: { name: coll } } : {}),
+    ...(attribs !== undefined  ? { attributes: attribs } : {}),
+    compiler:    'XRPMAN MUSIC NFT CREATOR v5'
+  };
+  Object.keys(obj).forEach(k => obj[k] === undefined && delete obj[k]);
+  return obj;
+}
+
+/* ═══════════════════════════════════════════════════════
+   REFRESH / VALIDATE
+═══════════════════════════════════════════════════════ */
+function refresh() {
+  const total    = getTotal();
+  const assigned = images.reduce((s, i) => s + i.qty, 0);
+  const imgOk    = images.length > 0 && assigned === total;
+  const nameOk   = !!document.getElementById('name').value.trim();
+
+  const ready = imgOk && nameOk;
+  document.getElementById('gen-btn').disabled = !ready;
+
+  const st = document.getElementById('status-txt');
+  if      (!nameOk)             { st.textContent='ENTER A PROJECT NAME';            st.style.color='var(--r)'; }
+  else if (!images.length)      { st.textContent='ADD IMAGES TO GET STARTED';       st.style.color='var(--r)'; }
+  else if (assigned > total)    { st.textContent=`OVER BY ${assigned-total}`;       st.style.color='var(--r)'; }
+  else if (!imgOk)              { st.textContent=`NEED ${total-assigned} MORE`;     st.style.color='var(--r)'; }
+  else                          { st.textContent='✓ READY TO EXPORT';               st.style.color='var(--g)'; }
+
+  const ic = document.getElementById('img-card');
+  ic.className = 'card' + (images.length && !imgOk ? ' err' : images.length && imgOk ? ' ok' : '');
+  updateTally(); updateDistro(); updatePreview();
+}
+
+function updatePreview() {
+  const projName = document.getElementById('name').value || 'Project Name';
+  const desc     = document.getElementById('description').value || '';
+  const coll     = document.getElementById('collection').value || '';
+  const img0     = images[0];
+  const obj = img0
+    ? makeNFT(projName, desc, coll, img0.name, img0.audioTracks, img0.traitValues, 0)
+    : { note: 'Upload images to see preview' };
+  document.getElementById('preview').textContent = JSON.stringify(obj, null, 2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BATCH NAVIGATOR
+═══════════════════════════════════════════════════════ */
+function buildBatch() {
+  batchSlots = [];
+  images.forEach(img => {
+    for (let q = 0; q < img.qty; q++) {
+      batchSlots.push({ name: img.name, dataUrl: img.dataUrl, audioTracks: [...img.audioTracks], traitValues: {...img.traitValues} });
+    }
+  });
+  navIdx = 0;
+  document.getElementById('nav-prev').disabled = true;
+  document.getElementById('nav-next').disabled = batchSlots.length <= 1;
+  renderNavSlot();
+}
+
+function navStep(dir) {
+  navIdx = Math.max(0, Math.min(batchSlots.length - 1, navIdx + dir));
+  document.getElementById('nav-prev').disabled = navIdx === 0;
+  document.getElementById('nav-next').disabled = navIdx === batchSlots.length - 1;
+  renderNavSlot();
+}
+
+function renderNavSlot() {
+  if (!batchSlots.length) return;
+  const slot     = batchSlots[navIdx];
+  const projName = document.getElementById('name').value || 'Project Name';
+  const desc     = document.getElementById('description').value || '';
+  const coll     = document.getElementById('collection').value || '';
+  document.getElementById('nav-num').textContent = `${navIdx + 1} / ${batchSlots.length}`;
+  document.getElementById('nav-thumb').innerHTML = `<img src="${slot.dataUrl}" alt="">`;
+  const obj = makeNFT(projName, desc, coll, slot.name, slot.audioTracks, slot.traitValues, navIdx);
+  document.getElementById('nav-json').textContent = JSON.stringify(obj, null, 2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GENERATE ZIP
+═══════════════════════════════════════════════════════ */
+async function generate() {
+  const zip      = new JSZip();
+  const total    = getTotal();
+  const projName = document.getElementById('name').value;
+  const desc     = document.getElementById('description').value || '';
+  const coll     = document.getElementById('collection').value || '';
+
+  const root = zip.folder(projName.replace(/\s+/g,'_'));
+  const meta = root.folder('metadata');
+  root.folder('media');
+
+  const slots = [];
+  images.forEach(img => {
+    for (let q = 0; q < img.qty; q++) {
+      slots.push({ name: img.name, audioTracks: [...img.audioTracks], traitValues: {...img.traitValues} });
+    }
+  });
+
+  for (let i = 0; i < total; i++) {
+    const slot = slots[i];
+    const item = makeNFT(projName, desc, coll, slot.name, slot.audioTracks, slot.traitValues, i);
+    meta.file(`${i+1}.json`, JSON.stringify(item, null, 2));
+  }
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `${projName.replace(/\s+/g,'_')}_NFT_v5.zip`;
+  a.click();
+}
+
+/* ═══════════════════════════════════════════════════════
+   COPY ADDRESS
+═══════════════════════════════════════════════════════ */
+function copyAddr() {
+  navigator.clipboard.writeText(document.getElementById('xrp-addr').innerText).catch(()=>{});
+  const btn = document.getElementById('copyAddrBtn');
+  btn.textContent = '✓ COPIED!';
+  setTimeout(() => btn.textContent = '📋 COPY ADDRESS', 2000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   BACKGROUND CANVAS
+═══════════════════════════════════════════════════════ */
+const canvas = document.getElementById('bg-canvas');
+const ctx    = canvas.getContext('2d');
+const CHARS  = ['♩','♪','♫','♬','♭','♮','♯'];
+let notes    = [];
+function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+class Note {
+  constructor() { this.reset(); this.y = Math.random() * innerHeight; }
+  reset() { this.x=Math.random()*canvas.width; this.y=canvas.height+40; this.ch=CHARS[Math.floor(Math.random()*CHARS.length)]; this.sz=Math.random()*16+7; this.sp=Math.random()*1.3+.35; this.op=Math.random()*.22+.04; this.dr=(Math.random()-.5)*.6; }
+  tick() { this.y-=this.sp; this.x+=this.dr; if(this.y<-40) this.reset(); }
+  draw() { ctx.fillStyle=`rgba(0,255,0,${this.op})`; ctx.font=`${this.sz}px serif`; ctx.fillText(this.ch,this.x,this.y); }
+}
+function anim() { ctx.clearRect(0,0,canvas.width,canvas.height); notes.forEach(n=>{n.tick();n.draw();}); requestAnimationFrame(anim); }
+window.addEventListener('resize', resize); resize();
+for(let i=0;i<30;i++) notes.push(new Note());
+anim();
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+refresh();
+if (!localStorage.getItem('xrpman-v5')) { openModal('mod-tut'); localStorage.setItem('xrpman-v5','1'); }
+</script>
+</body>
+</html>
