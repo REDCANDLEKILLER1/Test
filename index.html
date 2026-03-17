@@ -224,11 +224,11 @@ select option { background: #0a0a0a; color: #00FF00; }
 <div id="mod-tut" class="modal">
   <div class="m-content">
     <div class="m-title">🚀 QUICK START — v5</div>
-    <div class="tut-step"><h3>1. Collection Identity</h3><p>Set project name + total batch size.</p></div>
-    <div class="tut-step"><h3>2. Upload Images</h3><p>Each image gets a quantity slider. <b>Auto-Distribute</b> splits evenly. Total must equal batch size.</p></div>
-    <div class="tut-step"><h3>3. Audio Library</h3><p>Add your track filenames once — e.g. <code>1.mp3</code>, <code>rare.mp3</code>. Then on each image card, pick which tracks belong to that image from a dropdown. No file upload needed — XRP Cafe handles IPFS.</p></div>
-    <div class="tut-step"><h3>4. Traits</h3><p>Define traits once (e.g. <b>Hat → Gold, Silver</b>). Then on each image card, pick which value applies. The rarity comes from the image's quantity — no extra math needed.</p></div>
-    <div class="tut-step"><h3>5. Preview &amp; Export</h3><p>Use the Batch Navigator to flip through every NFT before exporting. Download ZIP → drop files in <code>media/</code> → upload to XRP Cafe.</p></div>
+    <div class="tut-step"><h3>1. Collection Identity</h3><p>Set your project name and total batch size. This tool is built specifically for <b>Music NFTs on the XRPL</b> — pair your artwork with your tracks.</p></div>
+    <div class="tut-step"><h3>2. Upload Artwork</h3><p><b>PNG and GIF only.</b> Name your files exactly as you want them in the metadata — e.g. <code>1.png</code>, <code>2.gif</code>. The filename goes into the metadata exactly as-is. No path is added.</p></div>
+    <div class="tut-step"><h3>3. Audio Library</h3><p>Add your MP3 filenames here — e.g. <code>1.mp3</code>, <code>rare.mp3</code>. Filenames only. XRP Cafe handles the IPFS upload. Then assign tracks to each image from the dropdown on each artwork card.</p></div>
+    <div class="tut-step"><h3>4. Traits (Optional)</h3><p>Define trait categories (e.g. <b>Edition → Rare, Common</b>) and assign values per image. Rarity is automatic — it's based on each image's quantity.</p></div>
+    <div class="tut-step"><h3>5. Preview &amp; Export</h3><p>Use the Batch Navigator to inspect every single NFT before exporting. Download ZIP → drop your PNG/GIF and MP3 files in <code>media/</code> → upload to XRP Cafe → mint.</p></div>
     <button class="btn-main" onclick="closeModal('mod-tut')">GET STARTED</button>
   </div>
 </div>
@@ -275,13 +275,13 @@ select option { background: #0a0a0a; color: #00FF00; }
 
   <!-- STEP 2: IMAGES -->
   <div class="section">
-    <div class="step-lbl">Step 2 · Upload Images</div>
+    <div class="step-lbl">Step 2 · Artwork — PNG &amp; GIF Only</div>
     <div class="card" id="img-card">
       <div class="upload-zone" id="upload-zone">
-        <input type="file" id="img-input" multiple accept="image/*" onchange="handleImages(this.files)">
-        <div class="upload-icon">🖼️</div>
-        <p>Tap to add images</p>
-        <div class="hint">Desktop: drag &amp; drop a folder · Phone: tap to browse gallery</div>
+        <input type="file" id="img-input" multiple accept=".png,.gif,image/png,image/gif" onchange="handleImages(this.files)">
+        <div class="upload-icon">🎵</div>
+        <p>Tap to add your artwork</p>
+        <div class="hint">PNG and GIF only · filename must be exact (e.g. 1.png, 2.gif) · Desktop: drag &amp; drop a folder</div>
       </div>
       <button class="btn-distro" id="distro-btn" onclick="autoDistribute()">⚡ AUTO-DISTRIBUTE EVENLY ACROSS BATCH</button>
       <div class="img-grid" id="img-grid"></div>
@@ -292,7 +292,7 @@ select option { background: #0a0a0a; color: #00FF00; }
 
   <!-- STEP 3: AUDIO LIBRARY -->
   <div class="section">
-    <div class="step-lbl">Step 3 · Audio Library</div>
+    <div class="step-lbl">Step 3 · Music — Audio Track Library</div>
     <div class="card">
       <p style="font-size:.63rem;color:#00FF00;margin-bottom:14px;line-height:1.6;">
         Add all your track filenames here first. Then assign them to images in Step 2.<br>
@@ -352,7 +352,13 @@ select option { background: #0a0a0a; color: #00FF00; }
 
   <!-- LIVE PREVIEW -->
   <div class="section">
-    <div class="prev-lbl">⬡ Live Preview — NFT #1</div>
+    <div class="prev-lbl">⬡ Live Preview — <span id="prev-img-name">NFT #1</span>
+      <span id="prev-img-nav" style="display:none;margin-left:10px;">
+        <button onclick="prevImgStep(-1)" style="background:none;border:1px solid #00FF00;color:#00FF00;border-radius:4px;padding:2px 8px;cursor:pointer;font-family:var(--mono);font-size:.6rem;">◀</button>
+        <span id="prev-img-counter" style="font-size:.6rem;margin:0 6px;color:#00FF00;"></span>
+        <button onclick="prevImgStep(1)" style="background:none;border:1px solid #00FF00;color:#00FF00;border-radius:4px;padding:2px 8px;cursor:pointer;font-family:var(--mono);font-size:.6rem;">▶</button>
+      </span>
+    </div>
     <div class="prev-box" id="preview">{}</div>
   </div>
 
@@ -403,7 +409,7 @@ zone.addEventListener('drop', e => {
     if (entry && entry.isDirectory) {
       pending++;
       entry.createReader().readEntries(entries => {
-        entries.forEach(en => { if (en.isFile) { pending++; en.file(f => { if (f.type.startsWith('image/')) fileList.push(f); pending--; done(); }); } });
+        entries.forEach(en => { if (en.isFile) { pending++; en.file(f => { if (f.type === 'image/png' || f.type === 'image/gif') fileList.push(f); pending--; done(); }); } });
         pending--; done();
       });
     } else { const f = item.getAsFile(); if (f && f.type.startsWith('image/')) fileList.push(f); }
@@ -415,7 +421,7 @@ zone.addEventListener('drop', e => {
    HANDLE IMAGE FILES
 ═══════════════════════════════════════════════════════ */
 function handleImages(files) {
-  const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+  const arr = Array.from(files).filter(f => f.type === 'image/png' || f.type === 'image/gif');
   let loaded = 0;
   arr.forEach(file => {
     const reader = new FileReader();
@@ -582,6 +588,7 @@ function assignAudioToImage(idx) {
   if (!images[idx].audioTracks.includes(id)) {
     images[idx].audioTracks.push(id);
     renderChips(idx);
+    prevImgIdx = idx; // jump live preview to this image
     refresh();
   }
   sel.value = '';
@@ -710,8 +717,10 @@ function removeTraitValue(id, val) {
 }
 
 function setTraitValue(imgIdx, traitId, val) {
-  if (val) images[imgIdx].traitValues[traitId] = val;
-  else delete images[imgIdx].traitValues[traitId];
+  const key = String(traitId); // always string key
+  if (val) images[imgIdx].traitValues[key] = val;
+  else delete images[imgIdx].traitValues[key];
+  updatePreview(); // direct call so preview always reflects this image
   refresh();
 }
 
@@ -790,22 +799,23 @@ function resolveTraits(traitValues) {
   if (!document.getElementById('traits-tog').checked) return undefined;
   const attrs = [];
   traits.forEach(tr => {
-    const val = traitValues[tr.id];
+    // coerce both sides to string to prevent number/string key mismatch
+    const val = traitValues[String(tr.id)];
     if (val) attrs.push({ trait_type: tr.name || 'Trait', value: val });
   });
   return attrs.length ? attrs : undefined;
 }
 
 function makeNFT(projName, desc, coll, imgName, audioTracks, traitValues, slotIndex) {
-  const audio  = resolveAudio(audioTracks);
+  const audio   = resolveAudio(audioTracks);
   const attribs = resolveTraits(traitValues);
   const obj = {
     name:        `${projName} #${slotIndex + 1}`,
     description: desc || undefined,
-    image:       `media/${imgName}`,
-    ...(audio !== undefined    ? { audio }           : {}),
-    ...(coll                   ? { collection: { name: coll } } : {}),
-    ...(attribs !== undefined  ? { attributes: attribs } : {}),
+    image:       `media/${imgName}`,   // fixed: always include media/ prefix
+    ...(audio !== undefined   ? { audio }                   : {}),
+    ...(coll                  ? { collection: { name: coll } } : {}),
+    ...(attribs !== undefined ? { attributes: attribs }     : {}),
     compiler:    'XRPMAN MUSIC NFT CREATOR v5'
   };
   Object.keys(obj).forEach(k => obj[k] === undefined && delete obj[k]);
@@ -836,13 +846,36 @@ function refresh() {
   updateTally(); updateDistro(); updatePreview();
 }
 
+let prevImgIdx = 0;
+
+function prevImgStep(dir) {
+  prevImgIdx = Math.max(0, Math.min(images.length - 1, prevImgIdx + dir));
+  updatePreview();
+}
+
 function updatePreview() {
+  // clamp index in case images were removed
+  prevImgIdx = Math.max(0, Math.min(images.length - 1, prevImgIdx));
+
   const projName = document.getElementById('name').value || 'Project Name';
   const desc     = document.getElementById('description').value || '';
   const coll     = document.getElementById('collection').value || '';
-  const img0     = images[0];
-  const obj = img0
-    ? makeNFT(projName, desc, coll, img0.name, img0.audioTracks, img0.traitValues, 0)
+  const img      = images[prevImgIdx];
+
+  // show/hide nav arrows
+  const nav = document.getElementById('prev-img-nav');
+  const lbl = document.getElementById('prev-img-name');
+  const ctr = document.getElementById('prev-img-counter');
+  if (images.length > 1 && nav) {
+    nav.style.display = 'inline';
+    if (ctr) ctr.textContent = `${prevImgIdx + 1} / ${images.length}`;
+  } else if (nav) {
+    nav.style.display = 'none';
+  }
+  if (lbl) lbl.textContent = img ? `${img.name} preview` : 'NFT #1';
+
+  const obj = img
+    ? makeNFT(projName, desc, coll, img.name, img.audioTracks, img.traitValues, prevImgIdx)
     : { note: 'Upload images to see preview' };
   document.getElementById('preview').textContent = JSON.stringify(obj, null, 2);
 }
