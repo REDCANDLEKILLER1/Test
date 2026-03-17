@@ -16,7 +16,7 @@
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
-body { background: var(--dark); color: #fff; font-family: var(--mono); min-height: 100vh; overflow-x: hidden; background-image: radial-gradient(ellipse at 50% 0%, #001800 0%, #050a05 65%); }
+body { background: var(--dark); color: #00F0FF; font-family: var(--mono); min-height: 100vh; overflow-x: hidden; background-image: radial-gradient(ellipse at 50% 0%, #001800 0%, #050a05 65%); }
 #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .app { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 20px 16px 210px; }
 
@@ -24,7 +24,7 @@ body { background: var(--dark); color: #fff; font-family: var(--mono); min-heigh
 .header { text-align: center; margin-bottom: 32px; }
 .v-badge { display: inline-block; background: var(--g); color: #000; font-family: var(--disp); font-size: .5rem; font-weight: 700; padding: 3px 14px; border-radius: 20px; letter-spacing: 2px; margin-bottom: 10px; }
 .header h1 { font-family: var(--disp); font-weight: 900; font-size: clamp(1.1rem,5vw,1.8rem); color: var(--g); text-shadow: 0 0 20px var(--g), 0 0 50px rgba(0,255,0,.2); letter-spacing: 3px; text-transform: uppercase; line-height: 1.2; }
-.header .sub { font-family: var(--disp); font-size: .52rem; letter-spacing: 7px; color: rgba(0,255,0,.45); margin: 8px 0 16px; text-transform: uppercase; }
+.header .sub { font-family: var(--disp); font-size: .52rem; letter-spacing: 7px; color: rgba(0,240,255,.75); margin: 8px 0 16px; text-transform: uppercase; }
 .hdr-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .btn-hdr { background: transparent; border: 1px solid var(--b); color: var(--b); padding: 10px 18px; border-radius: 24px; cursor: pointer; font-family: var(--mono); font-size: .65rem; letter-spacing: 1px; text-transform: uppercase; transition: all .2s; min-height: 48px; display: inline-flex; align-items: center; }
 .btn-hdr:hover { background: var(--b); color: #000; }
@@ -42,24 +42,24 @@ body { background: var(--dark); color: #fff; font-family: var(--mono); min-heigh
 @media(max-width:400px) { .g2 { grid-template-columns: 1fr; } }
 .ig { margin-bottom: 14px; }
 .ig:last-child { margin-bottom: 0; }
-label { display: block; font-size: .6rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+label { display: block; font-size: .6rem; color: #00C8DD; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
 input[type=text], input[type=number], textarea, select {
-  width: 100%; background: var(--inp); border: 1px solid #1e1e1e; color: #fff;
+  width: 100%; background: var(--inp); border: 1px solid #1e1e1e; color: #00F0FF;
   padding: 12px; border-radius: 8px; font-family: var(--mono); font-size: .85rem;
   outline: none; transition: border-color .2s; min-height: 48px; -webkit-appearance: none;
 }
 input:focus, textarea:focus, select:focus { border-color: var(--g); box-shadow: 0 0 6px rgba(0,255,0,.08); }
 textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
 select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2300FF00' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
-select option { background: #0a0a0a; color: #fff; }
+select option { background: #0a0a0a; color: #00F0FF; }
 
 /* UPLOAD ZONE */
 .upload-zone { border: 2px dashed rgba(0,255,0,.25); border-radius: 12px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all .3s; background: rgba(0,255,0,.015); position: relative; min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
 .upload-zone:hover, .upload-zone.drag-over { border-color: var(--g); background: rgba(0,255,0,.04); box-shadow: 0 0 20px rgba(0,255,0,.08); }
 .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; font-size: 16px; }
 .upload-icon { font-size: 2rem; }
-.upload-zone p { font-size: .75rem; color: #666; }
-.upload-zone .hint { font-size: .6rem; color: #3a3a3a; }
+.upload-zone p { font-size: .75rem; color: #00C8DD; }
+.upload-zone .hint { font-size: .6rem; color: #009AAA; }
 
 /* AUTO DISTRIBUTE */
 .btn-distro { width: 100%; background: rgba(0,240,255,.05); border: 1px solid rgba(0,240,255,.25); color: var(--b); padding: 10px; border-radius: 8px; cursor: pointer; font-family: var(--mono); font-size: .65rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; transition: all .2s; min-height: 44px; display: none; }
@@ -78,8 +78,8 @@ select option { background: #0a0a0a; color: #fff; }
 .img-fname { font-size: .58rem; color: var(--g); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
 .pct-badge { display: flex; align-items: center; justify-content: space-between; background: rgba(0,255,0,.05); border: 1px solid rgba(0,255,0,.15); border-radius: 8px; padding: 5px 8px; }
 .pct-num { font-family: var(--disp); font-size: 1.2rem; font-weight: 900; color: var(--g); text-shadow: 0 0 10px var(--g); line-height: 1; }
-.pct-label { font-size: .45rem; color: #555; text-transform: uppercase; letter-spacing: 1px; }
-.pct-count { font-size: .6rem; color: #888; }
+.pct-label { font-size: .45rem; color: #00A8B8; text-transform: uppercase; letter-spacing: 1px; }
+.pct-count { font-size: .6rem; color: #00D0E0; }
 
 .qty-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
 .qty-num-inp { width: 62px !important; padding: 7px 4px !important; font-size: 1rem !important; font-weight: bold !important; text-align: center !important; flex-shrink: 0 !important; min-height: 42px !important; color: var(--g) !important; border-color: rgba(0,255,0,.2) !important; }
@@ -92,7 +92,7 @@ select option { background: #0a0a0a; color: #fff; }
 .assign-panel { padding: 10px 12px 12px; border-top: 1px solid #1a1a1a; }
 .assign-section { margin-bottom: 10px; }
 .assign-section:last-child { margin-bottom: 0; }
-.assign-lbl { font-size: .52rem; color: #555; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+.assign-lbl { font-size: .52rem; color: #00A8B8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
 
 /* AUDIO CHIPS on image card */
 .audio-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; min-height: 10px; }
@@ -108,7 +108,7 @@ select option { background: #0a0a0a; color: #fff; }
 
 /* TRAIT CHIPS on image card */
 .trait-assign-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
-.trait-assign-name { font-size: .6rem; color: #888; min-width: 60px; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trait-assign-name { font-size: .6rem; color: #00D0E0; min-width: 60px; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .trait-assign-row select { flex: 1; font-size: .72rem !important; padding: 7px 32px 7px 8px !important; min-height: 38px !important; border-color: rgba(0,240,255,.15) !important; }
 .trait-assign-row select:focus { border-color: var(--b) !important; }
 
@@ -124,7 +124,7 @@ select option { background: #0a0a0a; color: #fff; }
 /* DISTRO BARS */
 .distro-bars { margin-top: 12px; display: none; }
 .distro-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
-.distro-name { font-size: .58rem; color: #888; min-width: 80px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.distro-name { font-size: .58rem; color: #00D0E0; min-width: 80px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .distro-bar-bg { flex: 1; background: #111; border-radius: 3px; height: 6px; overflow: hidden; }
 .distro-bar-fill { height: 100%; background: var(--g); border-radius: 3px; transition: width .3s; box-shadow: 0 0 5px rgba(0,255,0,.3); }
 .distro-pct { font-size: .58rem; color: var(--g); min-width: 38px; text-align: right; }
@@ -136,7 +136,7 @@ select option { background: #0a0a0a; color: #fff; }
 
 /* TOGGLE */
 .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.toggle-lbl { font-size: .65rem; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+.toggle-lbl { font-size: .65rem; color: #00D8E8; text-transform: uppercase; letter-spacing: 1px; }
 .toggle { position: relative; width: 50px; height: 28px; flex-shrink: 0; }
 .toggle input { display: none; }
 .tog-track { position: absolute; inset: 0; background: #111; border-radius: 14px; border: 1px solid #2a2a2a; cursor: pointer; transition: all .3s; }
@@ -179,8 +179,8 @@ select option { background: #0a0a0a; color: #fff; }
 .btn-nav:active { background: var(--g2); }
 .btn-nav:disabled { opacity: .2; cursor: not-allowed; }
 .nav-counter { text-align: center; min-width: 120px; }
-.nav-num { font-family: var(--disp); font-size: 1rem; color: #fff; letter-spacing: 2px; }
-.nav-sub { font-size: .48rem; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+.nav-num { font-family: var(--disp); font-size: 1rem; color: #00F0FF; letter-spacing: 2px; }
+.nav-sub { font-size: .48rem; color: #00A8B8; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
 .nav-preview { display: flex; gap: 14px; align-items: flex-start; }
 @media(max-width:480px) { .nav-preview { flex-direction: column; } }
 .nav-thumb { width: 110px; height: 110px; flex-shrink: 0; border: 1px solid #1e1e1e; border-radius: 8px; overflow: hidden; background: #0a0a0a; display: flex; align-items: center; justify-content: center; font-size: .58rem; color: #333; text-align: center; }
@@ -207,7 +207,7 @@ select option { background: #0a0a0a; color: #fff; }
 .m-title { font-family: var(--disp); font-size: .95rem; color: var(--b); letter-spacing: 2px; margin-bottom: 22px; text-align: center; }
 .tut-step { margin-bottom: 20px; }
 .tut-step h3 { color: var(--g); font-size: .8rem; margin-bottom: 5px; }
-.tut-step p { color: #888; font-size: .73rem; line-height: 1.55; }
+.tut-step p { color: #00D0E0; font-size: .73rem; line-height: 1.55; }
 .tut-step code { color: var(--b); background: #111; padding: 1px 5px; border-radius: 3px; }
 .qr-wrap { width: 160px; height: 160px; background: #fff; margin: 16px auto; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 10px; }
 .qr-wrap img { width: 100%; height: 100%; }
@@ -237,7 +237,7 @@ select option { background: #0a0a0a; color: #fff; }
 <div id="mod-tip" class="modal">
   <div class="m-content" style="text-align:center;">
     <div class="m-title">🪙 TIP THE CREATOR</div>
-    <p style="font-size:.72rem;color:#555;">Support XRPMAN — send XRP</p>
+    <p style="font-size:.72rem;color:#00C0D0;">Support XRPMAN — send XRP</p>
     <div class="qr-wrap">
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=rDg6Q7mTBsVo35cNf6vUSx8uEsDD8Hw7B2" alt="QR">
     </div>
@@ -294,9 +294,9 @@ select option { background: #0a0a0a; color: #fff; }
   <div class="section">
     <div class="step-lbl">Step 3 · Audio Library</div>
     <div class="card">
-      <p style="font-size:.63rem;color:#555;margin-bottom:14px;line-height:1.6;">
+      <p style="font-size:.63rem;color:#00C0D0;margin-bottom:14px;line-height:1.6;">
         Add all your track filenames here first. Then assign them to images in Step 2.<br>
-        <span style="color:#3a3a3a;">Filenames only — XRP Cafe handles the IPFS upload.</span>
+        <span style="color:#008899;">Filenames only — XRP Cafe handles the IPFS upload.</span>
       </p>
       <div id="audio-lib-list"></div>
       <button class="btn-add" onclick="addAudioLib()">+ Add Track to Library</button>
@@ -319,7 +319,7 @@ select option { background: #0a0a0a; color: #fff; }
         </label>
       </div>
       <div id="traits-sec" style="display:none;">
-        <p style="font-size:.63rem;color:#555;margin-bottom:12px;line-height:1.6;">
+        <p style="font-size:.63rem;color:#00C0D0;margin-bottom:12px;line-height:1.6;">
           Define trait categories and their possible values here.<br>
           Then assign a value to each image in Step 2.
         </p>
@@ -722,7 +722,7 @@ function renderTraits() {
         <button class="btn-icon" onclick="removeTrait('${tr.id}')">✕</button>
       </div>
       <div class="trait-values-lbl">Values</div>
-      <div class="trait-def-vals" id="tvals-${tr.id}">${valChips || '<span style="font-size:.58rem;color:#333">no values yet</span>'}</div>
+      <div class="trait-def-vals" id="tvals-${tr.id}">${valChips || '<span style="font-size:.58rem;color:#007788">no values yet</span>'}</div>
       <div class="val-add-row">
         <input type="text" id="valinp-${tr.id}" placeholder="Type a value, e.g. Gold">
         <button class="btn-add-val" onclick="addTraitValue('${tr.id}', document.getElementById('valinp-${tr.id}').value); document.getElementById('valinp-${tr.id}').value='';">+ Add</button>
@@ -927,13 +927,23 @@ let notes    = [];
 function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
 class Note {
   constructor() { this.reset(); this.y = Math.random() * innerHeight; }
-  reset() { this.x=Math.random()*canvas.width; this.y=canvas.height+40; this.ch=CHARS[Math.floor(Math.random()*CHARS.length)]; this.sz=Math.random()*16+7; this.sp=Math.random()*1.3+.35; this.op=Math.random()*.22+.04; this.dr=(Math.random()-.5)*.6; }
+  reset() {
+    this.x=Math.random()*canvas.width; this.y=canvas.height+40;
+    this.ch=CHARS[Math.floor(Math.random()*CHARS.length)];
+    this.sz=Math.random()*22+10; this.sp=Math.random()*1.4+.4;
+    this.op=Math.random()*.55+.2;
+    this.dr=(Math.random()-.5)*.7;
+    this.cyan=Math.random()>.5;
+  }
   tick() { this.y-=this.sp; this.x+=this.dr; if(this.y<-40) this.reset(); }
-  draw() { ctx.fillStyle=`rgba(0,255,0,${this.op})`; ctx.font=`${this.sz}px serif`; ctx.fillText(this.ch,this.x,this.y); }
+  draw() {
+    ctx.fillStyle=this.cyan?`rgba(0,240,255,${this.op})`:`rgba(0,255,0,${this.op})`;
+    ctx.font=`${this.sz}px serif`; ctx.fillText(this.ch,this.x,this.y);
+  }
 }
 function anim() { ctx.clearRect(0,0,canvas.width,canvas.height); notes.forEach(n=>{n.tick();n.draw();}); requestAnimationFrame(anim); }
 window.addEventListener('resize', resize); resize();
-for(let i=0;i<30;i++) notes.push(new Note());
+for(let i=0;i<55;i++) notes.push(new Note());
 anim();
 
 /* ═══════════════════════════════════════════════════════
